@@ -8,6 +8,7 @@ coloredlogs.install(level="INFO")
 
 app = Starlette(
     on_startup=[lambda : print("Server Ready")],
+    on_shutdown=[lambda: print("Server Shutting Down")],
     routes=routes,
     debug=os.environ.get("ENVIRONMENT", "production") == "development"
 )
