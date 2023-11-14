@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "blackjack-api"
+version = "0.1.0"
+description = "python backend for blackjack gameplay"
+authors = ["Peter Simone <plssimone@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+starlette = "^0.32.0.post1"
+asyncio = "^3.4.3"
+uvicorn = "^0.24.0.post1"
+pydantic = "^2.5.0"
+coloredlogs = "^15.0.1"
+numpy = "^1.26.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
