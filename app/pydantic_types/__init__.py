@@ -1,5 +1,6 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 from pydantic import BaseModel
+from app.modules.cards import Card
 
 class StateActionPair(BaseModel):
     player_show: int
@@ -24,6 +25,16 @@ class RulesI(BaseModel):
     hit_after_split_aces: bool=False
     reduced_blackjack_payout: bool=False
     allow_surrender: bool=True
+
+class MessageSend(BaseModel):
+    balance: float
+    count: int
+    true_count: float
+    text: str
+    player_total: int
+    house_cards: List[Union[str, int]] = []
+    player_cards: List[Union[str, int]] = []
+    policy: List[str] = []
 
 QMovesI = Dict[str, float]
 

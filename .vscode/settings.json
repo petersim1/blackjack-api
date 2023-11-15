@@ -5,4 +5,7 @@
   "editor.detectIndentation": false,
   "editor.indentSize": "tabSize",
   "notebook.output.scrolling": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8"
+  }
 }
