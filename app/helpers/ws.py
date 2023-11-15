@@ -1,9 +1,11 @@
-from app.modules.game import Game
-from app.modules.cards import Card, SuitEnum
+from typing import TYPE_CHECKING
 from app.pydantic_types import MessageSend
 from typing import Iterator
 
-def gather_responses(game: Game, balance: float, data: object) -> Iterator[MessageSend]:
+if TYPE_CHECKING:
+    from app.routes.ws import Consumer
+
+def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
     '''
     currently just assume single player, single hand.
         code : start, step, end
@@ -17,41 +19,30 @@ def gather_responses(game: Game, balance: float, data: object) -> Iterator[Messa
     text = ""
     match code:
         case "start":
-            game.init_round([wager])
-            game.deal_init()
+            obj.game.init_round([wager])
+            obj.game.deal_init()
             text = "Game Started!"
         case "step":
-            game.step_player(0, move)
+            obj.game.step_player(0, move)
         case "end":
-            message = MessageSend(
-                balance=balance,
-                count=game.count,
-                true_count=game.true_count,
-                player_total=0,
-                text="Round Ended"
-            )
-            yield message
-            return
-        case _:
-            yield MessageSend(text="error")
             return
 
-    house_cards = [card.card for card in game.house.cards[0].cards]
-    player_cards = [card.card for card in game.players[0].cards[0].cards]
-    player_total = game.players[0].cards[0].total
-    policy = game.players[0].get_valid_moves()
+    house_cards = [card.card for card in obj.game.house.cards[0].cards]
+    player_cards = [card.card for card in obj.game.players[0].cards[0].cards]
+    player_total = obj.game.players[0].cards[0].total
+    policy = obj.game.players[0].get_valid_moves()
 
-    if not game.house_played:
-        if not game.house_blackjack:
+    if not obj.game.house_played:
+        if not obj.game.house_blackjack:
             house_cards[-1] = "Hidden"
         else:
             text = "House Blackjack :("
             policy = []
     
     yield MessageSend(
-        balance=balance,
-        count=game.count,
-        true_count=game.true_count,
+        balance=obj.balance,
+        count=obj.game.count,
+        true_count=obj.game.true_count,
         text=text,
         player_total=player_total,
         player_cards=player_cards,
@@ -59,20 +50,20 @@ def gather_responses(game: Game, balance: float, data: object) -> Iterator[Messa
         policy=policy
     )
 
-    if game.players[0].is_done():
-        game.step_house()
-        house_cards = [card.card for card in game.house.cards[0].cards]
-        player_cards = [card.card for card in game.players[0].cards[0].cards]
-        player_total = game.players[0].cards[0].total
+    if obj.game.players[0].is_done():
+        obj.game.step_house()
+        house_cards = [card.card for card in obj.game.house.cards[0].cards]
+        player_cards = [card.card for card in obj.game.players[0].cards[0].cards]
+        player_total = obj.game.players[0].cards[0].total
 
-        texts, winnings = game.get_results()
-        balance += winnings[0][0]
+        texts, winnings = obj.game.get_results()
+        obj.balance += winnings[0][0]
 
         yield MessageSend(
-            balance=balance,
-            count=game.count,
-            true_count=game.true_count,
-            text=texts[0][0],
+            balance=obj.balance,
+            count=obj.game.count,
+            true_count=obj.game.true_count,
+            text=texts[0][0] + " " + str(winnings[0][0]),
             player_total=player_total,
             player_cards=player_cards,
             house_cards=house_cards,

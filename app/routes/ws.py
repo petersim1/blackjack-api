@@ -34,14 +34,14 @@ class Consumer(WebSocketEndpoint):
     task = None
     clients = set()
     game = None
-    balance = 100
+    balance = 0
 
     async def on_connect(self, websocket: WebSocket):
         logger.info(f"connection started {websocket.client.port}")
         await websocket.accept()
         self.game = Game(**game_hyperparams)
         self.clients.add(websocket)
-        message = f"You have ${self.balance}"
+
         message = MessageSend(
             balance=self.balance,
             count=self.game.count,
@@ -53,11 +53,12 @@ class Consumer(WebSocketEndpoint):
         await websocket.send_json(message.model_dump())
 
     async def on_receive(self, websocket: WebSocket, data: object):
-        responses = gather_responses(self.game, self.balance, json.loads(data))
-        logger.info(self.balance)
-        await self.send_sequential_messages(responses, websocket)
-        
-        match data:
+        data = json.loads(data)
+        code = data.get("code", "reset")
+        match code:
+            case "start" | "step" | "end":
+                responses = gather_responses(self, data)
+                await self.send_sequential_messages(responses, websocket)
             case 'ping':
                 if self.task is not None:
                     await websocket.send_text('background task is already running')
@@ -65,8 +66,6 @@ class Consumer(WebSocketEndpoint):
 
                 await websocket.send_text('start background task')
                 self.task = asyncio.create_task(self.simulate_long_task(websocket))
-            case 'get':
-                await websocket.send_json({"name": "pete", "age": 21})
             case 'update':
                 self.to_update = random.random()
                 self.broadcast(f'updated to {self.to_update}', websocket)

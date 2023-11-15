@@ -18,7 +18,7 @@ index_str = """<!DOCTYPE HTML>
                 player_cards,
                 player_total,
             } = JSON.parse(data);
-            document.getElementById("balance").innerHTML = balance
+            document.getElementById("profit").innerHTML = balance
             document.getElementById("count").innerHTML = count
             document.getElementById("true-count").innerHTML = true_count.toFixed(4)
             if (!!text) {
@@ -43,7 +43,7 @@ index_str = """<!DOCTYPE HTML>
     <div style="margin-bottom: 10px;">
         <button onclick="websocket.send(JSON.stringify({code: 'start'}))">Start Game</button><br>
     </div>
-    <div>Balance: $<span id="balance">0</span></div>
+    <div>Profit: $<span id="profit">0</span></div>
     <div>Count: <span id="count">0</span></div>
     <div>True Count: <span id="true-count">0</span></div>
     <div style="display: flex; flex-direction: row; gap: 10px;">
@@ -51,7 +51,6 @@ index_str = """<!DOCTYPE HTML>
         <button onclick="websocket.send(JSON.stringify({code: 'step', move: 'hit'}))" name="hit">Hit</button><br>
         <button onclick="websocket.send(JSON.stringify({code: 'step', move: 'double'}))" name="double">Double</button><br>
         <button onclick="websocket.send(JSON.stringify({code: 'close'}))">End</button><br>
-        <button onclick="websocket.send(JSON.stringify({code: 'get'}))">Get</button><br>
     </div>
 </body>
 </html>
