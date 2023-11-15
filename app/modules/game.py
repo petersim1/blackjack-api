@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Union, Tuple
 
-from src.modules.cards import Cards, Card
-from src.modules.player import Player
-from src.pydantic_types import RulesI
+from app.modules.cards import Cards, Card
+from app.modules.player import Player
+from app.pydantic_types import RulesI
 
 
 """
@@ -30,6 +30,7 @@ class Game :
     ratio_penetrate: float = 4 / 6
     n_rounds_played: int = field(init=False, default=0)
     reset_deck_after_round: bool = field(init=False, default=False)
+    cut_card: int = field(init=False)
     shoe: Cards = field(init=False)
     players: List[Player] = field(init=False)
     house: Player = field(init=False)
@@ -40,6 +41,7 @@ class Game :
     def __post_init__(self):
         if not isinstance(self.rules, RulesI):
             self.rules = RulesI(**self.rules)
+        self.cut_card = int(self.n_decks * 52 * (1 - self.ratio_penetrate))
         self._init_deck()
                 
     def _init_deck(self) -> None:
@@ -56,7 +58,7 @@ class Game :
         card = self.shoe.select_card(deplete=self.shrink_deck)
         
 
-        stop_card_met = len(self.shoe.cards) <= (int(self.n_decks * 52 * self.ratio_penetrate))
+        stop_card_met = len(self.shoe.cards) <= self.cut_card
 
         if stop_card_met and self.shrink_deck:
             self.reset_deck_after_round = True
