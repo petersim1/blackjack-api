@@ -56,6 +56,19 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
         player_cards = [card.card for card in obj.game.players[0].cards[0].cards]
         player_total = obj.game.players[0].cards[0].total
 
+        for i in range(2,len(house_cards)+1):
+            yield MessageSend(
+                balance=obj.balance,
+                count=obj.game.count,
+                true_count=obj.game.true_count,
+                text=text,
+                player_total=player_total,
+                player_cards=player_cards,
+                house_cards=house_cards[:i],
+                policy=policy
+            )
+
+
         texts, winnings = obj.game.get_results()
         obj.balance += winnings[0][0]
 

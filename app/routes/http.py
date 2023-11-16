@@ -45,7 +45,7 @@ index_str = """<!DOCTYPE HTML>
     <div style="margin-bottom: 10px;">
         <button onclick="websocket.send(JSON.stringify({code: 'start'}))">Start Game</button><br>
     </div>
-    <div>Profit: $<span id="profit">0</span></div>
+    <div>Profit: <span id="profit">0</span> units</div>
     <div>Count: <span id="count">0</span></div>
     <div>True Count: <span id="true-count">0</span></div>
     <div style="display: flex; flex-direction: row; gap: 10px;">

@@ -41,6 +41,7 @@ class Consumer(WebSocketEndpoint):
         await websocket.accept()
         self.game = Game(**game_hyperparams)
         self.clients.add(websocket)
+        print(self.clients)
 
         message = MessageSend(
             balance=self.balance,
