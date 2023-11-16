@@ -24,9 +24,11 @@ index_str = """<!DOCTYPE HTML>
             if (!!text) {
                 document.body.innerHTML += text + "<br>";
             }
-            document.body.innerHTML += "House Cards: " + String(house_cards) + " --- ";
-            document.body.innerHTML += "Player Cards: " + String(player_cards) + " --- ";
-            document.body.innerHTML += String(player_total) + "<br>";
+            if (player_total > 0) {
+                document.body.innerHTML += "House Cards: " + String(house_cards) + " --- ";
+                document.body.innerHTML += "Player Cards: " + String(player_cards) + " --- ";
+                document.body.innerHTML += String(player_total) + "<br>";
+            }
             Array.from(document.querySelectorAll("button[name]")).forEach((el) => {
                 if (!policy.includes(el.name)) {
                     el.disabled = true

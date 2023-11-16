@@ -5,7 +5,7 @@ import random
 import asyncio
 import logging
 import json
-from typing import List
+from typing import Iterator
 from app.modules.game import Game
 from app.helpers.ws import gather_responses
 from app.pydantic_types import MessageSend
@@ -48,17 +48,30 @@ class Consumer(WebSocketEndpoint):
             true_count=self.game.true_count,
             player_total=0,
             text="Welcome, start playing",
-            policy=["hit", "stand", "double"]
+            policy=[]
         )
         await websocket.send_json(message.model_dump())
 
     async def on_receive(self, websocket: WebSocket, data: object):
+        if self.task is not None:
+            message = MessageSend(
+                balance=self.balance,
+                count=self.game.count,
+                true_count=self.game.true_count,
+                player_total=0,
+                text="State is updating, hold on.",
+                policy=["hit", "stand", "double"]
+            )
+            await websocket.send_json(message.model_dump())
+            return
         data = json.loads(data)
         code = data.get("code", "reset")
         match code:
             case "start" | "step" | "end":
                 responses = gather_responses(self, data)
-                await self.send_sequential_messages(responses, websocket)
+                self.task = asyncio.create_task(
+                    self.send_sequential_messages(responses, websocket)
+                )
             case 'ping':
                 if self.task is not None:
                     await websocket.send_text('background task is already running')
@@ -74,10 +87,16 @@ class Consumer(WebSocketEndpoint):
                 await websocket.send_text(json.dumps(message))
                 await websocket.close()
 
-    async def send_sequential_messages(self, messages: List[MessageSend], websocket: WebSocket) -> None:
-        for message in messages:
+    async def send_sequential_messages(self, messages: Iterator[MessageSend], websocket: WebSocket) -> None:
+        message = next(messages, None)
+        while message is not None:
+            # this logic only places a timeout between messages,
+            # not just after each message. Helps with backend throttling issues.
             await websocket.send_json(message.model_dump())
-            await asyncio.sleep(0.5)
+            message = next(messages, None)
+            if message is not None:
+                await asyncio.sleep(1)
+        self.task = None
 
 
     async def simulate_long_task(self, websocket: WebSocket):
