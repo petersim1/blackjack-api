@@ -4,10 +4,10 @@ from enum import Enum
 from numpy.random import choice
 
 class SuitEnum(Enum):
-    hearts = "h"
-    clubs = "c"
-    diamonds = "d"
-    spades = "s"
+    hearts = "H"
+    clubs = "C"
+    diamonds = "D"
+    spades = "S"
 
 @dataclass
 class Card:

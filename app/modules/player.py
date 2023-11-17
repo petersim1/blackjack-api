@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
-from src.modules.cards import Cards, Card
-from src.pydantic_types import RulesI
+from app.modules.cards import Cards, Card
+from app.pydantic_types import RulesI
 
 @dataclass
 class Player:
