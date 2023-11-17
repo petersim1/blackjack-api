@@ -28,6 +28,8 @@ class RulesI(BaseModel):
 
 class MessageSend(BaseModel):
     round_over: bool
+    deal_house: bool
+    deal_player: bool
     profit: float
     count: Tuple[int, float]
     text: str

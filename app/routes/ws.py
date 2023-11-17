@@ -45,6 +45,8 @@ class Consumer(WebSocketEndpoint):
 
         message = MessageSend(
             round_over=True,
+            deal_house=False,
+            deal_player=False,
             profit=self.balance,
             count=(self.game.count, self.game.true_count),
             player_total=0,

@@ -17,13 +17,18 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
     wager = int(data.get("wager", 1))
     move = data.get("move", "")
     text = ""
+    deal_house = False
+    deal_player = False
     match code:
         case "start":
             obj.game.init_round([wager])
             obj.game.deal_init()
             text = "Game Started!"
+            deal_house = True
+            deal_player = True
         case "step":
             obj.game.step_player(0, move)
+            deal_player = move != "stay"
         case "end":
             return
 
@@ -41,6 +46,8 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
     
     yield MessageSend(
         round_over=False,
+        deal_house=deal_house,
+        deal_player=deal_player,
         profit=obj.balance,
         count=(obj.game.count, obj.game.true_count),
         text=text,
@@ -59,6 +66,8 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
         for i in range(2,len(house_cards)+1):
             yield MessageSend(
                 round_over=False,
+                deal_house=True,
+                deal_player=False,
                 profit=obj.balance,
                 count=(obj.game.count, obj.game.true_count),
                 text=text,
@@ -74,6 +83,8 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
 
         yield MessageSend(
             round_over=True,
+            deal_house=False,
+            deal_player=False,
             profit=obj.balance,
             count=(obj.game.count, obj.game.true_count),
             text=texts[0][0] + " " + str(winnings[0][0]),
