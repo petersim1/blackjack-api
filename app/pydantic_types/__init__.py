@@ -27,6 +27,7 @@ class RulesI(BaseModel):
     allow_surrender: bool=True
 
 class MessageSend(BaseModel):
+    cards_remaining: float
     round_over: bool
     deal_house: bool
     deal_player: bool

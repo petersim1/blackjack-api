@@ -44,6 +44,7 @@ class Consumer(WebSocketEndpoint):
         print(self.clients)
 
         message = MessageSend(
+            cards_remaining=1,
             round_over=True,
             deal_house=False,
             deal_player=False,
