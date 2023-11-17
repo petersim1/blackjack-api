@@ -27,22 +27,22 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
         case "end":
             return
 
-    house_cards = [card.card for card in obj.game.house.cards[0].cards]
-    player_cards = [card.card for card in obj.game.players[0].cards[0].cards]
+    house_cards = [[card.card,card.suit] for card in obj.game.house.cards[0].cards]
+    player_cards = [[card.card,card.suit] for card in obj.game.players[0].cards[0].cards]
     player_total = obj.game.players[0].cards[0].total
     policy = obj.game.players[0].get_valid_moves()
 
     if not obj.game.house_played:
         if not obj.game.house_blackjack:
-            house_cards[-1] = "Hidden"
+            house_cards[-1] = ["Hidden", "Hidden"]
         else:
             text = "House Blackjack :("
             policy = []
     
     yield MessageSend(
-        balance=obj.balance,
-        count=obj.game.count,
-        true_count=obj.game.true_count,
+        round_over=False,
+        profit=obj.balance,
+        count=(obj.game.count, obj.game.true_count),
         text=text,
         player_total=player_total,
         player_cards=player_cards,
@@ -52,15 +52,15 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
 
     if obj.game.players[0].is_done():
         obj.game.step_house()
-        house_cards = [card.card for card in obj.game.house.cards[0].cards]
-        player_cards = [card.card for card in obj.game.players[0].cards[0].cards]
+        house_cards = [[card.card,card.suit] for card in obj.game.house.cards[0].cards]
+        player_cards = [[card.card,card.suit] for card in obj.game.players[0].cards[0].cards]
         player_total = obj.game.players[0].cards[0].total
 
         for i in range(2,len(house_cards)+1):
             yield MessageSend(
-                balance=obj.balance,
-                count=obj.game.count,
-                true_count=obj.game.true_count,
+                round_over=False,
+                profit=obj.balance,
+                count=(obj.game.count, obj.game.true_count),
                 text=text,
                 player_total=player_total,
                 player_cards=player_cards,
@@ -73,9 +73,9 @@ def gather_responses(obj: "Consumer", data: object) -> Iterator[MessageSend]:
         obj.balance += winnings[0][0]
 
         yield MessageSend(
-            balance=obj.balance,
-            count=obj.game.count,
-            true_count=obj.game.true_count,
+            round_over=True,
+            profit=obj.balance,
+            count=(obj.game.count, obj.game.true_count),
             text=texts[0][0] + " " + str(winnings[0][0]),
             player_total=player_total,
             player_cards=player_cards,

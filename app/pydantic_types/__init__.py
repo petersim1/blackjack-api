@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Tuple
 from pydantic import BaseModel
 from app.modules.cards import Card
 
@@ -27,13 +27,13 @@ class RulesI(BaseModel):
     allow_surrender: bool=True
 
 class MessageSend(BaseModel):
-    balance: float
-    count: int
-    true_count: float
+    round_over: bool
+    profit: float
+    count: Tuple[int, float]
     text: str
     player_total: int
-    house_cards: List[Union[str, int]] = []
-    player_cards: List[Union[str, int]] = []
+    house_cards: List[Tuple[Union[str, int], str]] = []
+    player_cards: List[Tuple[Union[str, int], str]] = []
     policy: List[str] = []
 
 QMovesI = Dict[str, float]

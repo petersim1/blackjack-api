@@ -44,9 +44,9 @@ class Consumer(WebSocketEndpoint):
         print(self.clients)
 
         message = MessageSend(
-            balance=self.balance,
-            count=self.game.count,
-            true_count=self.game.true_count,
+            round_over=True,
+            profit=self.balance,
+            count=(self.game.count, self.game.true_count),
             player_total=0,
             text="Welcome, start playing",
             policy=[]
@@ -55,15 +55,15 @@ class Consumer(WebSocketEndpoint):
 
     async def on_receive(self, websocket: WebSocket, data: object):
         if self.task is not None:
-            message = MessageSend(
-                balance=self.balance,
-                count=self.game.count,
-                true_count=self.game.true_count,
-                player_total=0,
-                text="State is updating, hold on.",
-                policy=["hit", "stand", "double"]
-            )
-            await websocket.send_json(message.model_dump())
+            # message = MessageSend(
+            #     balance=self.balance,
+            #     count=self.game.count,
+            #     true_count=self.game.true_count,
+            #     player_total=0,
+            #     text="State is updating, hold on.",
+            #     policy=["hit", "stand", "double"]
+            # )
+            # await websocket.send_json(message.model_dump())
             return
         data = json.loads(data)
         code = data.get("code", "reset")
