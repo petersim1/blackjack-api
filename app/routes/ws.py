@@ -13,7 +13,7 @@ from app.pydantic_types import MessageSend
 logger = logging.getLogger(__name__)
 
 rules = {
-    "dealer_hit_soft17": True,
+    "dealer_hit_soft17": False,
     "push_dealer22": False,
     "double_after_split": True,
     "hit_after_split_aces": False,
