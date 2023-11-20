@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Union, Tuple
+from typing import List, Tuple
 
 from app.modules.cards import Cards, Card
 from app.modules.player import Player
@@ -137,17 +137,33 @@ class Game :
 
 
     @_decorator
-    def step_house(self) -> None :
+    def step_house(self, only_reveal_card: bool=False) -> None :
+        """
+        can safely call this even if house is done.
+        """
+        # Originally I was completing a full hand here with a "while" loop.
+        # I think explicitly calling this until completion leads to 
+        # a better UX. Also, we get count updates, and house total updates
+        # throughout each card draw, versus only at the end of the house sequence.
 
+        self.house_played = True
+        if only_reveal_card: return
+
+        if self.house_done(): return
+        card = self._select_card()
+        self.house._deal_card(card)
+    
+    def house_done(self):
         house = self.house.cards[0].total
         useable_ace = self.house.cards[0].useable_ace
-        
-        while (house < 17) or ((house == 17) and useable_ace and self.rules.dealer_hit_soft17) :
-            card = self._select_card()
-            self.house._deal_card(card)
-            house = self.house.cards[0].total
-            useable_ace = self.house.cards[0].useable_ace
-        self.house_played = True
+
+        if house > 17:
+            return True
+        if ((house == 17) and not useable_ace):
+            return True
+        if ((house == 17) and useable_ace and (not self.rules.dealer_hit_soft17)):
+            return True
+        return False
             
 
     @_decorator
