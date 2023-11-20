@@ -1,29 +1,23 @@
 from typing import List, Dict, Optional, Union, Tuple
 from pydantic import BaseModel, Field
 
-class StateActionPair(BaseModel):
-    player_show: int
-    house_show: int
-    useable_ace: bool
-    can_split: bool
-    move: str
-
-class ReplayBuffer(BaseModel):
-    obs: tuple
-    action_space: List[str]
-    move: str
-    reward: float
-    done: int
-    obs_next: Optional[tuple]
-    action_space_next: Optional[List[str]]
-
 class RulesI(BaseModel):
-    dealer_hit_soft17: bool=True
+    dealer_hit_soft17: bool=False
     push_dealer22: bool=False
     double_after_split: bool=True
     hit_after_split_aces: bool=False
     reduced_blackjack_payout: bool=False
     allow_surrender: bool=True
+
+class DeckI(BaseModel):
+    shrink_deck: bool=True
+    n_decks: int=6
+    ratio_penetrate: float=4/6
+
+class GameParamsI(DeckI):
+    rules: RulesI
+
+CardDesctructured = Tuple[Union[str, int], str]
 
 class MessageSend(BaseModel):
     ready: bool = Field(
@@ -35,10 +29,11 @@ class MessageSend(BaseModel):
         description="whether the round is over"
     )
     hand_result: Tuple[str, int] = Field(
+        default=None,
         description="result of the hand (text, profit)"
     )
     round_profit: float = Field(
-        default=0,
+        default=None,
         description="result of the round (all hands)"
     )
     total_profit: float = Field(
@@ -54,18 +49,18 @@ class MessageSend(BaseModel):
         description="percent of cards remaining in shoe"
     )
     player_total: int = Field(
-        default=0,
+        default=None,
         description="total of player's current hand"
     )
-    player_cards: List[Tuple[Union[str, int], str]] = Field(
+    player_cards: List[CardDesctructured] = Field(
         default_factory=lambda : [],
         description="list of cards for player"
     )
     house_total: int = Field(
-        default=0,
+        default=None,
         description="total of house's current hand"
     )
-    house_cards: List[Tuple[Union[str, int], str]] = Field(
+    house_cards: List[CardDesctructured] = Field(
         default_factory=lambda : [],
         description="list of cards for house"
     )
@@ -73,7 +68,3 @@ class MessageSend(BaseModel):
         default_factory=lambda : [],
         description="current policy for player"
     )
-
-QMovesI = Dict[str, float]
-
-ConditionalActionSpace = List[List[List[str]]]
