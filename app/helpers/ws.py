@@ -44,6 +44,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
     wager = int(data.get("wager", 1))
     move = data.get("move", "")
     round_over = False
+    hand_result = None
     match code:
         case "start":
             obj.game.init_round([wager])
@@ -58,11 +59,11 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
             # hide the card from the client, but still present a "card" in the array.
             h_c[-1] = ["Hidden", "Hidden"]
         else:
-            text = "House Blackjack :("
+            hand_result = ("House Blackjack :(", -wager)
             policy = []
             round_over = True
             if p_t == 21:
-                text = "Push"
+                hand_result = ("push", 0)
             else:
                 obj.balance -= wager
     
@@ -71,6 +72,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
         round_over=round_over,
         total_profit=obj.balance,
         count=(obj.game.count, obj.game.true_count),
+        hand_result=hand_result,
         player_total=p_t,
         player_cards=p_c,
         house_total=h_t,
