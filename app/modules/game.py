@@ -137,30 +137,33 @@ class Game :
 
 
     @_decorator
-    def step_house(self) -> Tuple[bool, int] :
+    def step_house(self) -> None :
         """
-        returns: (is done, house total)
+        can safely call this even if house is done.
         """
         # Originally I was completing a full hand here with a "while" loop.
         # I think explicitly calling this until completion leads to 
         # a better UX. Also, we get count updates, and house total updates
         # throughout each card draw, versus only at the end of the house sequence.
 
-        house = self.house.cards[0].total
-        useable_ace = self.house.cards[0].useable_ace
         self.house_played = True
 
-        can_continue = (house < 17) or ((house == 17) and useable_ace and self.rules.dealer_hit_soft17)
-        if not can_continue:
-            return True, house
-        
+        if self.house_done(): return False
         card = self._select_card()
         self.house._deal_card(card)
+        return True
+    
+    def house_done(self):
         house = self.house.cards[0].total
         useable_ace = self.house.cards[0].useable_ace
-        can_continue = (house < 17) or ((house == 17) and useable_ace and self.rules.dealer_hit_soft17)
-        
-        return not can_continue, house
+
+        if house > 17:
+            return True
+        if ((house == 17) and not useable_ace):
+            return True
+        if ((house == 17) and useable_ace and (not self.rules.dealer_hit_soft17)):
+            return True
+        return False
             
 
     @_decorator

@@ -28,11 +28,11 @@ class MessageSend(BaseModel):
         default=False,
         description="whether the round is over"
     )
-    hand_result: Tuple[str, int] = Field(
+    hand_result: Optional[Tuple[str, float]] = Field(
         default=None,
         description="result of the hand (text, profit)"
     )
-    round_profit: float = Field(
+    round_profit: Optional[float] = Field(
         default=None,
         description="result of the round (all hands)"
     )
@@ -48,7 +48,7 @@ class MessageSend(BaseModel):
         default=1.0,
         description="percent of cards remaining in shoe"
     )
-    player_total: int = Field(
+    player_total: Optional[int] = Field(
         default=None,
         description="total of player's current hand"
     )
@@ -56,7 +56,7 @@ class MessageSend(BaseModel):
         default_factory=lambda : [],
         description="list of cards for player"
     )
-    house_total: int = Field(
+    house_total: Optional[int] = Field(
         default=None,
         description="total of house's current hand"
     )
