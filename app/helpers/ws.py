@@ -79,7 +79,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
     )
 
     if obj.game.players[0].is_done():
-        obj.game.house_played = True
+        obj.game.step_house(only_reveal_card=True)
         h_c, p_c, c_rem, h_t, p_t, policy = get_game_info(obj)
         while not obj.game.house_done():
             yield MessageSend(

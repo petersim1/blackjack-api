@@ -137,7 +137,7 @@ class Game :
 
 
     @_decorator
-    def step_house(self) -> None :
+    def step_house(self, only_reveal_card: bool=False) -> None :
         """
         can safely call this even if house is done.
         """
@@ -147,11 +147,11 @@ class Game :
         # throughout each card draw, versus only at the end of the house sequence.
 
         self.house_played = True
+        if only_reveal_card: return
 
-        if self.house_done(): return False
+        if self.house_done(): return
         card = self._select_card()
         self.house._deal_card(card)
-        return True
     
     def house_done(self):
         house = self.house.cards[0].total
