@@ -47,7 +47,7 @@ class Consumer(WebSocketEndpoint):
                     ready=True,
                     round_over=True,
                 )
-                websocket.send_json(message.model_dump())
+                await websocket.send_json(message.model_dump())
             
             case "start" | "step":
                 if not self.game:

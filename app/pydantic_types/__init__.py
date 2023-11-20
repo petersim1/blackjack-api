@@ -40,7 +40,7 @@ class MessageSend(BaseModel):
         default=0.0,
         description="running profit per session"
     )
-    count: Tuple[int, float] = Field(
+    count: List[Union[int, float]] = Field(
         default_factory=lambda : [0, 0.0],
         description="[running count, true count]"
     )
