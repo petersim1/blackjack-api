@@ -37,7 +37,7 @@ def get_game_info(obj: "Consumer") -> Tuple[
     if obj.game.house_played:
         house_total = obj.game.house.cards[0].total
     player_total = [cards.total for cards in obj.game.players[0].cards]
-    policy = [player.get_valid_moves() for player in obj.game.players]
+    policy = obj.game.players[0].get_valid_moves() # don't need a list, as this is only performed on current hand.
     cur_hand = obj.game.players[0].i_hand
 
     return house_cards, player_cards, c_remaining, house_total, player_total, policy, cur_hand
