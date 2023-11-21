@@ -68,7 +68,7 @@ class MessageSend(BaseModel):
         default_factory=lambda : [],
         description="list of cards for house"
     )
-    policy: List[List[str]] = Field(
-        default_factory=lambda : [[]],
-        description="current policy for player"
+    policy: List[str] = Field(
+        default_factory=lambda : [],
+        description="current policy for player's hand"
     )
