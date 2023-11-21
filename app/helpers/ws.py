@@ -41,7 +41,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
         wager: int (only applicable for code=='start')
         move: hit, stay, double (only applicable for code=='step')
     '''
-    wager = int(data.get("wager", 1))
+    wager = float(data.get("wager", 1))
     move = data.get("move", "")
     round_over = False
     hand_result = None
