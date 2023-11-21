@@ -92,7 +92,7 @@ class Player:
     def get_valid_moves(self) -> List[str] :
         possible_moves = []
         i_hand = self.i_hand
-        if (i_hand < 0) or self.is_done():
+        if (i_hand < 0): # catches when the player is done. Don't need to additional check .is_done()
             return possible_moves
         
         total, _ = self.get_value()
