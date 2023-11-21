@@ -33,9 +33,13 @@ def get_game_info(obj: "Consumer") -> Tuple[
     house_cards = [tuple([card.card,card.suit]) for card in obj.game.house.cards[0].cards]
     player_cards = [[tuple([card.card,card.suit]) for card in hand.cards] for hand in obj.game.players[0].cards]
     c_remaining = len(obj.game.shoe.cards) / (52 * obj.game.n_decks)
-    house_total = None
+    
     if obj.game.house_played:
         house_total = obj.game.house.cards[0].total
+    else:
+        house_total = None # don't want to show this to client
+        house_cards[-1] = ["Hidden", "Hidden"] # always hide here if house hasn't played.
+    
     player_total = [cards.total for cards in obj.game.players[0].cards]
     policy = obj.game.players[0].get_valid_moves() # don't need a list, as this is only performed on current hand.
     cur_hand = obj.game.players[0].i_hand
@@ -61,7 +65,6 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
             obj.game.step_player(0, move)
 
     h_c, p_c, c_rem, h_t, p_t, policy, cur_hand = get_game_info(obj)
-    h_c[-1] = ["Hidden", "Hidden"] # always hide here, following logic excludes this.
 
     yield MessageSend(
         cards_remaining=c_rem,

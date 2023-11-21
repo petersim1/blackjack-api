@@ -91,7 +91,7 @@ class Game :
 
     def init_round(self, wagers: List[float]) -> None :
         """Initializes the round. Resets the player, and will reshuffle as needed."""
-        self.wagers = wagers.copy()
+        self.wagers = wagers
         
         self._init_players()
         
