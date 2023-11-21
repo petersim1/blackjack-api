@@ -28,7 +28,11 @@ class MessageSend(BaseModel):
         default=False,
         description="whether the round is over"
     )
-    hand_result: Optional[List[Tuple[str, float]]] = Field(
+    hand_result_text: Optional[List[str]] = Field(
+        default=None,
+        description="result of the hand (text, profit)"
+    )
+    hand_result_profit: Optional[List[float]] = Field(
         default=None,
         description="result of the hand (text, profit)"
     )
