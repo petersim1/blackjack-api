@@ -1,11 +1,9 @@
-from starlette.routing import Route, WebSocketRoute
+from starlette.routing import WebSocketRoute
 
-from .http import Homepage
 from .ws import Consumer
 
 routes = [
-    Route("/", Homepage),
-    WebSocketRoute("/ws", Consumer)
+    WebSocketRoute("/", Consumer)
 ]
 
 __all__ = ["routes"]
