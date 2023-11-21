@@ -8,6 +8,7 @@ class RulesI(BaseModel):
     hit_after_split_aces: bool=False
     reduced_blackjack_payout: bool=False
     allow_surrender: bool=True
+    split_any_ten: bool=True
 
 class DeckI(BaseModel):
     shrink_deck: bool=True
