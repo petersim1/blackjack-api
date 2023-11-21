@@ -79,6 +79,7 @@ class Consumer(WebSocketEndpoint):
     async def send_sequential_messages(self, messages: Iterator[MessageSend], websocket: WebSocket) -> None:
         message = next(messages, None)
         while message is not None:
+            print(message)
             # this logic only places a timeout between messages,
             # not just after each message. Helps with backend throttling issues.
             await websocket.send_json(message.model_dump())

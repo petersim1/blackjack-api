@@ -28,33 +28,33 @@ class MessageSend(BaseModel):
         default=False,
         description="whether the round is over"
     )
-    hand_result: Optional[Tuple[str, float]] = Field(
+    hand_result: Optional[List[Tuple[str, float]]] = Field(
         default=None,
         description="result of the hand (text, profit)"
-    )
-    round_profit: Optional[float] = Field(
-        default=None,
-        description="result of the round (all hands)"
     )
     total_profit: float = Field(
         default=0.0,
         description="running profit per session"
     )
-    count: List[Union[int, float]] = Field(
-        default_factory=lambda : [0, 0.0],
+    count: Tuple[int, float] = Field(
+        default=(0, 0.0),
         description="[running count, true count]"
     )
     cards_remaining: float = Field(
         default=1.0,
         description="percent of cards remaining in shoe"
     )
-    player_total: Optional[int] = Field(
+    player_total: Optional[List[int]] = Field(
         default=None,
-        description="total of player's current hand"
+        description="total of player's hands"
     )
-    player_cards: List[CardDesctructured] = Field(
+    player_cards: List[List[CardDesctructured]] = Field(
         default_factory=lambda : [],
         description="list of cards for player"
+    )
+    current_hand: int = Field(
+        default=0,
+        description="current index of player's hand"
     )
     house_total: Optional[int] = Field(
         default=None,
@@ -64,7 +64,7 @@ class MessageSend(BaseModel):
         default_factory=lambda : [],
         description="list of cards for house"
     )
-    policy: List[str] = Field(
+    policy: List[List[str]] = Field(
         default_factory=lambda : [],
         description="current policy for player"
     )
