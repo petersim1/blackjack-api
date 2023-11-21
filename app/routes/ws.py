@@ -49,6 +49,17 @@ class Consumer(WebSocketEndpoint):
                 )
                 await websocket.send_json(message.model_dump())
             
+            case "reset":
+                # Handled similarly to on_connect(), completely reset game,
+                # and force client to reestablish gameplay.
+                self.game = None
+                self.balance = 0
+                message = MessageSend(
+                    ready=False,
+                    round_over=True,
+                )
+                await websocket.send_json(message.model_dump())
+            
             case "start" | "step":
                 if not self.game:
                     return

@@ -18,23 +18,29 @@ def handle_init(data: dict):
 
 
 def get_game_info(obj: "Consumer") -> Tuple[
-    List[CardDesctructured],
-    List[CardDesctructured],
+    List[List[CardDesctructured]],
+    List[List[CardDesctructured]],
     float,
     int,
-    int,
-    List[str]
+    List[int],
+    List[List[str]],
+    int
 ]:
-    house_cards = [[card.card,card.suit] for card in obj.game.house.cards[0].cards]
-    player_cards = [[card.card,card.suit] for card in obj.game.players[0].cards[0].cards]
+    """
+    Adopted this to now allow for multiple hands per player (solely due to split)
+    where there are mixed types, explicitly force a tuple (makes typing prettier + more obvious)
+    """
+    house_cards = [tuple([card.card,card.suit]) for card in obj.game.house.cards[0].cards]
+    player_cards = [[tuple([card.card,card.suit]) for card in hand.cards] for hand in obj.game.players[0].cards]
     c_remaining = len(obj.game.shoe.cards) / (52 * obj.game.n_decks)
     house_total = None
     if obj.game.house_played:
         house_total = obj.game.house.cards[0].total
-    player_total = obj.game.players[0].cards[0].total
-    policy = obj.game.players[0].get_valid_moves()
+    player_total = [cards.total for cards in obj.game.players[0].cards]
+    policy = obj.game.players[0].get_valid_moves() # don't need a list, as this is only performed on current hand.
+    cur_hand = obj.game.players[0].i_hand
 
-    return house_cards, player_cards, c_remaining, house_total, player_total, policy
+    return house_cards, player_cards, c_remaining, house_total, player_total, policy, cur_hand
 
 
 def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[MessageSend]:
@@ -47,7 +53,6 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
     wager = float(data.get("wager", 1))
     move = data.get("move", "")
     round_over = False
-    hand_result = None
     match code:
         case "start":
             obj.game.init_round([wager])
@@ -55,51 +60,53 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
         case "step":
             obj.game.step_player(0, move)
 
-    h_c, p_c, c_rem, h_t, p_t, policy = get_game_info(obj)
+    h_c, p_c, c_rem, h_t, p_t, policy, cur_hand = get_game_info(obj)
     h_c[-1] = ["Hidden", "Hidden"] # always hide here, following logic excludes this.
 
     yield MessageSend(
         cards_remaining=c_rem,
         round_over=round_over,
         total_profit=obj.balance,
-        count=(obj.game.count, obj.game.true_count),
-        hand_result=hand_result,
+        count=tuple([obj.game.count, obj.game.true_count]),
         player_total=p_t,
         player_cards=p_c,
-        house_total=h_t,
         house_cards=h_c,
-        policy=policy
+        policy=policy,
+        current_hand=cur_hand
     )
 
     if obj.game.players[0].is_done():
-        obj.game.step_house(only_reveal_card=True)
-        h_c, p_c, c_rem, h_t, p_t, policy = get_game_info(obj)
+        obj.game.step_house(only_reveal_card=True) # marks house_played as True
+        h_c, p_c, c_rem, h_t, p_t, policy, cur_hand = get_game_info(obj)
         while not obj.game.house_done():
             yield MessageSend(
                 cards_remaining=c_rem,
                 total_profit=obj.balance,
-                count=(obj.game.count, obj.game.true_count),
+                count=tuple([obj.game.count, obj.game.true_count]),
                 player_total=p_t,
                 player_cards=p_c,
                 house_total=h_t,
                 house_cards=h_c,
+                current_hand=cur_hand
             )
             obj.game.step_house()
-            h_c, p_c, c_rem, h_t, p_t, policy = get_game_info(obj)
+            h_c, p_c, c_rem, h_t, p_t, policy, cur_hand = get_game_info(obj)
 
         texts, winnings = obj.game.get_results()
-        obj.balance += winnings[0][0]
+        obj.balance += sum(winnings[0])
 
         yield MessageSend(
             cards_remaining=c_rem,
             round_over=True,
             total_profit=obj.balance,
-            count=(obj.game.count, obj.game.true_count),
-            hand_result=(texts[0][0], winnings[0][0]),
+            count=tuple([obj.game.count, obj.game.true_count]),
+            hand_result_text=texts[0], # only pull for first player (which will include all their hands)
+            hand_result_profit=winnings[0], # only pull for first player (which will include all their hands)
             player_total=p_t,
             player_cards=p_c,
             house_total=h_t,
             house_cards=h_c,
+            current_hand=cur_hand
         )
     
             
