@@ -127,7 +127,12 @@ class Game :
             self.house._deal_card(card)
         
         if self.house.cards[0].total == 21 :
-            self.house_blackjack = True # If house has blackjack, don't accept moves (except insurance + surrender)
+            # The flow is -> dealer shows a card, if it's an Ace or 10, then ask players if they want insurance.
+            # Dealer will then check the card, if it's blackjack, the round is over. If it's not blackjack, surrender is allowed.
+            # Since I'm doing this without insurance, it isn't relevant. End hand immediately if blackjack.
+            self.house_blackjack = True
+            for player in self.players:
+                player.force_completion()
         
     def get_house_show(self) -> Card :
         

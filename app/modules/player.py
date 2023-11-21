@@ -92,7 +92,7 @@ class Player:
     def get_valid_moves(self) -> List[str] :
         possible_moves = []
         i_hand = self.i_hand
-        if i_hand < 0 :
+        if (i_hand < 0) or self.is_done():
             return possible_moves
         
         total, _ = self.get_value()
@@ -142,6 +142,13 @@ class Player:
         if move == "surrender":
             self.surrendered = True
             self.complete[self.i_hand] = True
+
+    def force_completion(self):
+        """
+        beneficial when the house draws a blackjack, can force the player hand to end
+        without needing outside logical checks.
+        """
+        self.complete = [True]*len(self.cards)
 
     def get_result(self, house_cards: Cards) -> Tuple[List[str], float] :
 
