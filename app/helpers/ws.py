@@ -93,15 +93,15 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
             h_c, p_c, c_rem, h_t, p_t, policy, cur_hand = get_game_info(obj)
 
         texts, winnings = obj.game.get_results()
-        obj.balance += winnings[0][0]
+        obj.balance += sum(winnings[0])
 
         yield MessageSend(
             cards_remaining=c_rem,
             round_over=True,
             total_profit=obj.balance,
             count=tuple([obj.game.count, obj.game.true_count]),
-            hand_result_text=texts,
-            hand_result_profit=winnings,
+            hand_result_text=texts[0], # only pull for first player (which will include all their hands)
+            hand_result_profit=winnings[0], # only pull for first player (which will include all their hands)
             player_total=p_t,
             player_cards=p_c,
             house_total=h_t,

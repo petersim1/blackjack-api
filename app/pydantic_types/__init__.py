@@ -53,7 +53,7 @@ class MessageSend(BaseModel):
         description="total of player's hands"
     )
     player_cards: List[List[CardDesctructured]] = Field(
-        default_factory=lambda : [],
+        default_factory=lambda : [[]],
         description="list of cards for player"
     )
     current_hand: int = Field(
@@ -69,6 +69,6 @@ class MessageSend(BaseModel):
         description="list of cards for house"
     )
     policy: List[List[str]] = Field(
-        default_factory=lambda : [],
+        default_factory=lambda : [[]],
         description="current policy for player"
     )
