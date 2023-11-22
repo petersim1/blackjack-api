@@ -1,16 +1,19 @@
-from starlette.websockets import WebSocket
-from starlette.exceptions import WebSocketException
-from starlette.endpoints import WebSocketEndpoint
 import asyncio
-import logging
 import json
+import logging
 from typing import Iterator
-from app.modules.game import Game
-from app.helpers.ws import gather_responses, handle_init
-from app.pydantic_types import MessageSend, GameParamsI, RulesI, DeckI
+
 from pydantic import ValidationError
+from starlette.endpoints import WebSocketEndpoint
+from starlette.exceptions import WebSocketException
+from starlette.websockets import WebSocket
+
+from app.helpers.ws import gather_responses, handle_init
+from app.modules.game import Game
+from app.pydantic_types import MessageSend
 
 logger = logging.getLogger(__name__)
+
 
 class Consumer(WebSocketEndpoint):
     task = None
@@ -48,7 +51,7 @@ class Consumer(WebSocketEndpoint):
                     round_over=True,
                 )
                 await websocket.send_json(message.model_dump())
-            
+
             case "reset":
                 # Handled similarly to on_connect(), completely reset game,
                 # and force client to reestablish gameplay.
@@ -59,7 +62,7 @@ class Consumer(WebSocketEndpoint):
                     round_over=True,
                 )
                 await websocket.send_json(message.model_dump())
-            
+
             case "start" | "step":
                 if not self.game:
                     return
@@ -68,7 +71,7 @@ class Consumer(WebSocketEndpoint):
                     self.send_sequential_messages(responses, websocket)
                 )
 
-            case 'close':
+            case "close":
                 message = {"count": 0, "text": "closing connection", "policy": []}
                 await websocket.send_text(json.dumps(message))
                 await websocket.close()
@@ -76,7 +79,9 @@ class Consumer(WebSocketEndpoint):
             case _:
                 pass
 
-    async def send_sequential_messages(self, messages: Iterator[MessageSend], websocket: WebSocket) -> None:
+    async def send_sequential_messages(
+        self, messages: Iterator[MessageSend], websocket: WebSocket
+    ) -> None:
         message = next(messages, None)
         while message is not None:
             # this logic only places a timeout between messages,
@@ -86,7 +91,6 @@ class Consumer(WebSocketEndpoint):
             if message is not None:
                 await asyncio.sleep(1)
         self.task = None
-
 
     def broadcast(self, message, cur_ws):
         for client in self.clients:

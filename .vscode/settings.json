@@ -1,5 +1,5 @@
 {
-    "python.defaultInterpreterPath": "/Users/petersimone/Library/Caches/pypoetry/virtualenvs/blackjack-rl-KFb_NPB--py3.11/bin/python",
+    "python.defaultInterpreterPath": "/Users/petersimone/Library/Caches/pypoetry/virtualenvs/blackjack-api-8UXVOwZC-py3.11",
     "python.envFile": "${workspaceFolder}/.env",
     "editor.tabSize": 4,
     "editor.detectIndentation": false,
