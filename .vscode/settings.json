@@ -1,11 +1,16 @@
 {
-  "python.defaultInterpreterPath": "/Users/petersimone/Library/Caches/pypoetry/virtualenvs/blackjack-api-8UXVOwZC-py3.11/bin/python",
-  "python.envFile": "${workspaceFolder}/.env",
-  "editor.tabSize": 4,
-  "editor.detectIndentation": false,
-  "editor.indentSize": "tabSize",
-  "notebook.output.scrolling": true,
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.autopep8"
+    "python.defaultInterpreterPath": "/Users/petersimone/Library/Caches/pypoetry/virtualenvs/blackjack-rl-KFb_NPB--py3.11/bin/python",
+    "python.envFile": "${workspaceFolder}/.env",
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "editor.indentSize": "tabSize",
+    "editor.formatOnSave": false,
+    "editor.formatOnType": true,
+    "black-formatter.args": ["line-length=79"],
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter"
+    }
   }
-}
