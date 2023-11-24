@@ -13,6 +13,3 @@ poetry-install:
 
 poetry-env:
 	$(PO) env use $(shell which python)
-
-compose-dev:
-	docker compose up -d
