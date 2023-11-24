@@ -1,0 +1,6 @@
+version: '1'
+services:
+  websocket:
+    build: .
+    ports:
+      - 8080:8080
