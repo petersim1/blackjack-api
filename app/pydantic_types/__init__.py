@@ -1,4 +1,5 @@
-from typing import List, Dict, Optional, Union, Tuple
+from typing import List, Optional, Tuple, Union
+
 from pydantic import BaseModel, Field
 
 
@@ -58,4 +59,7 @@ class MessageSend(BaseModel):
     )
     policy: List[str] = Field(
         default_factory=lambda: [], description="current policy for player's hand"
+    )
+    model: Optional[Tuple[int, int, int]] = Field(
+        default=None, description="tuple required for RL model input"
     )
