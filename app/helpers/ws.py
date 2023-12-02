@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Iterator, List, Tuple
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple
 
 from app.pydantic_types import CardDesctructured, DeckI, MessageSend, RulesI
 
@@ -56,9 +56,8 @@ def get_game_info(
         ]  # always hide here if house hasn't played.
 
     player_total = [cards.total for cards in obj.game.players[0].cards]
-    policy = obj.game.players[
-        0
-    ].get_valid_moves()  # don't need a list, as this is only performed on current hand.
+    # don't need a list, as this is only performed on current hand.
+    policy = obj.game.players[0].get_valid_moves()
     cur_hand = obj.game.players[0].i_hand
 
     return (
@@ -70,6 +69,17 @@ def get_game_info(
         policy,
         cur_hand,
     )
+
+
+def get_model_tuple(obj: "Consumer") -> Optional[Tuple[int, int, int]]:
+    cur_hand = obj.game.players[0].i_hand
+    if cur_hand < 0:
+        return
+    player_total, useable_ace = obj.game.players[0].get_value()
+    house_card_show = obj.game.get_house_show()
+    house_total = house_card_show.value if house_card_show.value > 1 else 11
+
+    return player_total, house_total, 2 * int(useable_ace) - 1
 
 
 def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[MessageSend]:
@@ -90,6 +100,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
             obj.game.step_player(0, move)
 
     h_c, p_c, c_rem, h_t, p_t, policy, cur_hand = get_game_info(obj)
+    model_tuple = get_model_tuple(obj)
 
     yield MessageSend(
         cards_remaining=c_rem,
@@ -101,6 +112,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
         house_cards=h_c,
         policy=policy,
         current_hand=cur_hand,
+        model=model_tuple
     )
 
     if obj.game.players[0].is_done():
