@@ -24,11 +24,10 @@ async def test_me(websocket: WebSocket):
 
 
 class Consumer(WebSocketEndpoint):
-    task = None
+    tasks = {"messages": None, "heartbeat": False}
     clients = set()
     game = None
     balance = 0
-    heartbeat_waiting = False
 
     async def on_connect(self, websocket: WebSocket):
         logger.info(f"connection started {websocket.client.port}")
@@ -43,7 +42,11 @@ class Consumer(WebSocketEndpoint):
         await websocket.send_json(message.model_dump())
 
     async def on_receive(self, websocket: WebSocket, data: object):
-        if self.task is not None:
+        if self.tasks["messages"] is not None:
+            # I don't want to receive messages while the WS is "streaming"
+            # results back to the client.
+            # HOWEVER, this would also block PING-PONG actions, forcing closures.
+            # I added logic to the heartbeat() to check for this condition as well.
             # could send a message back to client, but could also just do nothing.
             return
         data: dict = json.loads(data)
@@ -77,7 +80,7 @@ class Consumer(WebSocketEndpoint):
                 if not self.game:
                     return
                 responses = gather_responses(self, data, code)
-                self.task = asyncio.create_task(
+                self.tasks["messages"] = asyncio.create_task(
                     self.send_sequential_messages(responses, websocket)
                 )
 
@@ -90,7 +93,7 @@ class Consumer(WebSocketEndpoint):
                 # Don't know what this id is actually based off of.
                 client_id = websocket.scope.get("client", ["", ""])[1]
                 logging.info(f"pong received from client {client_id}")
-                self.heartbeat_waiting = False
+                self.tasks["heartbeat"] = False
 
             case _:
                 # maybe implement a closure?
@@ -107,7 +110,7 @@ class Consumer(WebSocketEndpoint):
             message = next(messages, None)
             if message is not None:
                 await asyncio.sleep(1)
-        self.task = None
+        self.tasks["messages"] = None
 
     def broadcast(self, message: str, cur_ws: WebSocket):
         client: WebSocket
@@ -135,19 +138,22 @@ class Consumer(WebSocketEndpoint):
             # Time in between pings
             await asyncio.sleep(HEARTBEAT_INTERVAL)
             try:
-                # Send a ping message to the client
                 if (websocket.client_state.name == "DISCONNECTED"):
-                    # depending on the client, this might get hit EXACTLY once
-                    # due to initial connection issue.
                     return
+                if (self.tasks["messages"] is not None):
+                    # might be overlap with the active intermittent message courotine.
+                    # the client is clearly active, so skip, without breaking the loop.
+                    # this condition is met ONLY if the interval occurs while streaming
+                    # message responses in send_sequential_messages()
+                    continue
                 client_id = websocket.scope.get("client", ["", ""])[1]
                 logging.info(f"ping sent to client {client_id}")
                 await websocket.send_json({"type": "ping"})
-                self.heartbeat_waiting = True
+                self.tasks["heartbeat"] = True
 
                 # time allotted for the client to respond properly.
                 await asyncio.sleep(3)
-                if self.heartbeat_waiting:
+                if self.tasks["heartbeat"]:
                     print("FAILURE TO SEND PONG")
                     raise WebSocketException(code=1001)
             except WebSocketException:
