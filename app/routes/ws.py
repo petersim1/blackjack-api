@@ -14,6 +14,8 @@ from app.pydantic_types import MessageSend
 
 logger = logging.getLogger(__name__)
 
+HEARTBEAT_INTERVAL = 5
+
 
 class Consumer(WebSocketEndpoint):
     task = None
@@ -77,6 +79,7 @@ class Consumer(WebSocketEndpoint):
                 await websocket.close()
 
             case _:
+                # maybe implement a closure?
                 pass
 
     async def send_sequential_messages(
@@ -92,7 +95,8 @@ class Consumer(WebSocketEndpoint):
                 await asyncio.sleep(1)
         self.task = None
 
-    def broadcast(self, message, cur_ws):
+    def broadcast(self, message: str, cur_ws: WebSocket):
+        client: WebSocket
         for client in self.clients:
             try:
                 m = message
@@ -103,7 +107,27 @@ class Consumer(WebSocketEndpoint):
                 # in case that a client closed while something was being broadcasted.
                 pass
 
-    async def on_disconnect(self, websocket, close_code):
+    async def heartbeat(self, websocket: WebSocket):
+        while True:
+            try:
+                # Send a ping message to the client
+                await websocket.send_json({"type": "ping"})
+
+                # Wait for the pong response within a timeout
+                message = await asyncio.wait_for(websocket.receive_json(), timeout=3)
+                if message["type"] != "pong":
+                    raise WebSocketException
+            except asyncio.TimeoutError:
+                await websocket.close()
+                break
+            except WebSocketException:
+                await websocket.close()
+                break
+
+            # Adjust the interval as needed
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
+
+    async def on_disconnect(self, websocket: WebSocket, close_code: int):
         logger.info(f"connection closed {websocket.client_state} {close_code}")
         self.clients.remove(websocket)
         pass
