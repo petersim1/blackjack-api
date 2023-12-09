@@ -90,9 +90,6 @@ class Consumer(WebSocketEndpoint):
                 await websocket.close()
 
             case "pong":
-                # Don't know what this id is actually based off of.
-                client_id = websocket.scope.get("client", ["", ""])[1]
-                logging.info(f"pong received from client {client_id}")
                 self.tasks["heartbeat"] = False
 
             case _:
@@ -146,8 +143,6 @@ class Consumer(WebSocketEndpoint):
                     # this condition is met ONLY if the interval occurs while streaming
                     # message responses in send_sequential_messages()
                     continue
-                client_id = websocket.scope.get("client", ["", ""])[1]
-                logging.info(f"ping sent to client {client_id}")
                 await websocket.send_json({"type": "ping"})
                 self.tasks["heartbeat"] = True
 
@@ -157,6 +152,9 @@ class Consumer(WebSocketEndpoint):
                     print("FAILURE TO SEND PONG")
                     raise WebSocketException(code=1001)
             except WebSocketException:
+                # Don't know what this id is actually based off of.
+                client_id = websocket.scope.get("client", ["", ""])[1]
+                logging.info(f"client failure to respond to ping, id: {client_id}")
                 await websocket.close()
                 break
 
