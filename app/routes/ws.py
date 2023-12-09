@@ -154,7 +154,7 @@ class Consumer(WebSocketEndpoint):
             except WebSocketException:
                 # Don't know what this id is actually based off of.
                 client_id = websocket.scope.get("client", ["", ""])[1]
-                logging.info(f"client failure to respond to ping, id: {client_id}")
+                logging.warn(f"client failure to respond to ping, id: {client_id}")
                 await websocket.close()
                 break
 
