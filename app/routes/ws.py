@@ -17,11 +17,18 @@ logger = logging.getLogger(__name__)
 HEARTBEAT_INTERVAL = 5
 
 
+async def test_me(websocket: WebSocket):
+    await asyncio.sleep(5)
+    print(websocket.application_state.name)
+    print("k")
+
+
 class Consumer(WebSocketEndpoint):
     task = None
     clients = set()
     game = None
     balance = 0
+    heartbeat_waiting = False
 
     async def on_connect(self, websocket: WebSocket):
         logger.info(f"connection started {websocket.client.port}")
@@ -32,6 +39,7 @@ class Consumer(WebSocketEndpoint):
             ready=False,
             round_over=True,
         )
+        asyncio.create_task(self.heartbeat(websocket))
         await websocket.send_json(message.model_dump())
 
     async def on_receive(self, websocket: WebSocket, data: object):
@@ -78,6 +86,12 @@ class Consumer(WebSocketEndpoint):
                 await websocket.send_text(json.dumps(message))
                 await websocket.close()
 
+            case "pong":
+                # Don't know what this id is actually based off of.
+                client_id = websocket.scope.get("client", ["", ""])[1]
+                logging.info(f"pong received from client {client_id}")
+                self.heartbeat_waiting = False
+
             case _:
                 # maybe implement a closure?
                 pass
@@ -108,24 +122,37 @@ class Consumer(WebSocketEndpoint):
                 pass
 
     async def heartbeat(self, websocket: WebSocket):
+        """
+        On the client, I actually observe the following flow:
+        - WS 1 is opened
+        - WS 1 immediately closes
+        - WS 2 immediately opens
+        So, since this logic is placed within the .on_connect() fct,
+        we might actually get an invalidated websocket before the timeout occurs. Fix
+        for this after the initial .sleep() interval.
+        """
         while True:
+            # Time in between pings
+            await asyncio.sleep(HEARTBEAT_INTERVAL)
             try:
                 # Send a ping message to the client
+                if (websocket.client_state.name == "DISCONNECTED"):
+                    # depending on the client, this might get hit EXACTLY once
+                    # due to initial connection issue.
+                    return
+                client_id = websocket.scope.get("client", ["", ""])[1]
+                logging.info(f"ping sent to client {client_id}")
                 await websocket.send_json({"type": "ping"})
+                self.heartbeat_waiting = True
 
-                # Wait for the pong response within a timeout
-                message = await asyncio.wait_for(websocket.receive_json(), timeout=3)
-                if message["type"] != "pong":
-                    raise WebSocketException
-            except asyncio.TimeoutError:
-                await websocket.close()
-                break
+                # time allotted for the client to respond properly.
+                await asyncio.sleep(3)
+                if self.heartbeat_waiting:
+                    print("FAILURE TO SEND PONG")
+                    raise WebSocketException(code=1001)
             except WebSocketException:
                 await websocket.close()
                 break
-
-            # Adjust the interval as needed
-            await asyncio.sleep(HEARTBEAT_INTERVAL)
 
     async def on_disconnect(self, websocket: WebSocket, close_code: int):
         logger.info(f"connection closed {websocket.client_state} {close_code}")
