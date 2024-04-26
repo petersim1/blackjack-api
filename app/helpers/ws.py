@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple
 
-from app.pydantic_types import CardDesctructured, DeckI, MessageSend, RulesI
+from blackjack_multi import DeckI, RulesI
+
+from app.pydantic_types import CardDesctructured, MessageSend
 
 if TYPE_CHECKING:
     from app.routes.ws import Consumer
@@ -112,7 +114,7 @@ def gather_responses(obj: "Consumer", data: dict, code: str) -> Iterator[Message
         house_cards=h_c,
         policy=policy,
         current_hand=cur_hand,
-        model=model_tuple
+        model=model_tuple,
     )
 
     if obj.game.players[0].is_done():

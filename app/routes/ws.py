@@ -3,13 +3,13 @@ import json
 import logging
 from typing import Iterator
 
+from blackjack_multi import Game
 from pydantic import ValidationError
 from starlette.endpoints import WebSocketEndpoint
 from starlette.exceptions import WebSocketException
 from starlette.websockets import WebSocket
 
 from app.helpers.ws import gather_responses, handle_init
-from app.modules.game import Game
 from app.pydantic_types import MessageSend
 
 logger = logging.getLogger(__name__)
@@ -135,9 +135,9 @@ class Consumer(WebSocketEndpoint):
             # Time in between pings
             await asyncio.sleep(HEARTBEAT_INTERVAL)
             try:
-                if (websocket.client_state.name == "DISCONNECTED"):
+                if websocket.client_state.name == "DISCONNECTED":
                     return
-                if (self.tasks["messages"] is not None):
+                if self.tasks["messages"] is not None:
                     # might be overlap with the active intermittent message courotine.
                     # the client is clearly active, so skip, without breaking the loop.
                     # this condition is met ONLY if the interval occurs while streaming
