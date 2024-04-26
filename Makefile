@@ -15,7 +15,7 @@ poetry-env:
 	$(PO) env use $(shell which python)
 
 lint:
-	$(PO) run flake8
+	$(POER) flake8
 
 format:
-	$(PO) run black ./app/
+	$(POER) black ./app/
