@@ -89,6 +89,20 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
+name = "blackjack-multi"
+version = "0.1.6"
+description = "a python package for multiplayer blackjack gameplay"
+optional = false
+python-versions = "<4.0,>=3.11"
+files = [
+    {file = "blackjack_multi-0.1.6-py3-none-any.whl", hash = "sha256:54dbb079f58c73120452460740791d6ae89c2ed9736d68cf1b73b3d228cf2840"},
+    {file = "blackjack_multi-0.1.6.tar.gz", hash = "sha256:ba99563328a4f0c39807501d1aff4741b4af553f561eaf0d91d171f20a667651"},
+]
+
+[package.dependencies]
+pydantic = ">=2.7.1,<3.0.0"
+
+[[package]]
 name = "certifi"
 version = "2024.2.2"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -887,4 +901,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "49c01788d705c4f3a585040a0bea0f4540956e42343eeb7639965c0851ac1007"
+content-hash = "1d1fe36a96c75506cd072b6613300ec406220f604bb7d281bca4c54546875abb"

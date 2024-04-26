@@ -10,9 +10,7 @@ class Test(HTTPEndpoint):
     async def get(self, request: Request):
         return PlainTextResponse("Hello world!")
 
-routes = [
-    Route("/", Test),
-    WebSocketRoute("/ws", Consumer)
-    ]
+
+routes = [Route("/", Test), WebSocketRoute("/ws", Consumer)]
 
 __all__ = ["routes"]

@@ -13,6 +13,7 @@ uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 pydantic = "^2.5.0"
 coloredlogs = "^15.0.1"
 numpy = "^1.26.2"
+blackjack-multi = "^0.1.6"
 
 
 [tool.poetry.group.dev.dependencies]
