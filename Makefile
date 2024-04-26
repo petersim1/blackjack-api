@@ -13,3 +13,9 @@ poetry-install:
 
 poetry-env:
 	$(PO) env use $(shell which python)
+
+lint:
+	$(PO) run flake8
+
+format:
+	$(PO) run black ./app/
